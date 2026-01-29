@@ -423,7 +423,9 @@
       <div class="container text-center">
         <h6 class="subtitle">Portfolio</h6>
         <h6 class="section-title mb-4">Selected Projects</h6>
-        <p class="mb-5 pb-4">Real projects from GitHub repositry. Real code. No lorem ipsum.</p>
+        <p class="mb-5 pb-4">
+          Real projects from GitHub repositry. Real code. No lorem ipsum.
+        </p>
 
         <div class="row g-4" id="portfolio-repos"></div>
       </div>
@@ -518,60 +520,74 @@
       }
     </script>
     <script>
-      const USERNAME = "maxato237";
-      const API_URL = `https://api.github.com/users/${USERNAME}/repos?per_page=100`;
-
+      const USERS = ["maxato237", "maximeato"];
       const portfolioContainer = document.getElementById("portfolio-repos");
 
-      fetch(API_URL)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Erreur API GitHub");
-          }
-          return response.json();
-        })
-        .then((repos) => {
+      Promise.all(
+        USERS.map((username) =>
+          fetch(
+            `https://api.github.com/users/${username}/repos?per_page=100`
+          ).then((res) => {
+            if (!res.ok) throw new Error("Erreur API GitHub");
+            return res.json();
+          })
+        )
+      )
+        .then((results) => {
+          // Fusion des repos des deux comptes
+          const repos = results.flat();
+
+          const EXCLUDED_IDS = [
+            650503651, 777704983, 745019326, 653247154, 739101977,
+          ];
+
           const filteredRepos = repos.filter(
             (repo) =>
-              !repo.fork && // pas un fork
-              repo.size > 50 && // pas vide (en Ko)
-              repo.language !== null && // vrai code
-              !repo.archived // pas mort
+              !repo.fork &&
+              repo.size > 50 &&
+              repo.language !== null &&
+              !repo.archived &&
+              !EXCLUDED_IDS.includes(repo.id)
           );
 
           filteredRepos.forEach((repo) => {
-            console.log(repo.name, repo.description);
+            console.log(repo.owner.login, repo.name, repo.description);
+
             const col = document.createElement("div");
             col.className = "col-md-4 mb-4";
 
             col.innerHTML = `
-                  <div class="card h-100 shadow-sm">
-                    <div class="card-body text-start">
-                      <h4 class="card-title bold">${repo.name}</h4>
-                      <p class="card-text">
-                        ${repo.description ?? "Aucune description fournie."}
-                      </p>
-                    </div>
-        
-                    <div class="card-footer text-muted small">
-                      <div class="d-flex justify-content-between gap-2 mb-3">
-                        <a
-                          href="${repo.html_url}"
-                          target="_blank"
-                          class="btn btn-outline-dark btn-sm w-100"
-                        >
-                          Voir sur GitHub
-                        </a>
-                      </div>
-                      <div>
-                        ⭐ ${repo.stargazers_count}
-                        · 🍴 ${repo.forks_count}
-                        · 🧠 ${repo.language ?? "N/A"}
-                      </div>
-                    </div>
+              <div class="card h-100 shadow-sm">
+                <div class="card-body text-start">
+                  <h4 class="card-title bold">${repo.name}</h4>
+                  <p class="card-text">
+                    ${
+                      repo.description && repo.description.trim()
+                        ? repo.description
+                        : "Projet en cours – voir GitHub pour les détails."
+                    }
+                  </p>
+                </div>
+    
+                <div class="card-footer text-muted small">
+                  <div class="d-flex justify-content-between gap-2 mb-3">
+                    <a
+                      href="${repo.html_url}"
+                      target="_blank"
+                      class="btn btn-outline-dark btn-sm w-100"
+                    >
+                      Voir sur GitHub
+                    </a>
                   </div>
-                `;
-
+                  <div>
+                    👤 ${repo.owner.login}
+                    · ⭐ ${repo.stargazers_count}
+                    · 🍴 ${repo.forks_count}
+                    · 🧠 ${repo.language ?? "N/A"}
+                  </div>
+                </div>
+              </div>
+            `;
             portfolioContainer.appendChild(col);
           });
         })
