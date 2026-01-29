@@ -74,7 +74,7 @@
           <h6 class="title">Maxime ATO</h6>
           <p>Software Engineer</p>
 
-          <div class="buttons pt-3" style="display: flex; align-items: center;">
+          <div class="buttons pt-3" style="display: flex; align-items: center">
             <div>
               <a class="nav-link" href="#contact"
                 ><button class="btn btn-primary rounded">HIRE ME</button></a
@@ -114,7 +114,7 @@
           <p>Happy Clients</p>
         </div>
         <div class="widget-item">
-          <h2>03</h2>
+          <h2>10</h2>
           <p>Projects worked</p>
         </div>
         <div class="widget-item">
@@ -423,115 +423,9 @@
       <div class="container text-center">
         <h6 class="subtitle">Portfolio</h6>
         <h6 class="section-title mb-4">Selected Projects</h6>
-        <p class="mb-5 pb-4">Real projects. Real code. No lorem ipsum.</p>
+        <p class="mb-5 pb-4">Real projects from GitHub repositry. Real code. No lorem ipsum.</p>
 
-        <div class="row g-4">
-          <!-- PROJECT CARD -->
-          <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body text-start">
-                <h4 class="card-title bold">DRINHOSELLER</h4>
-                <p class="card-text">
-                  Custom web application enabling wholesalers to digitalize
-                  complete operations without ERP or spreadsheets. Comprehensive
-                  solution for inventory, sales, customer management, supplier
-                  tracking, payroll, and expense management.
-                </p>
-              </div>
-
-              <div class="card-footer text-muted small">
-                <div class="d-flex justify-content-between gap-2 mb-4">
-                  <a
-                    href="https://github.com/maxato237/DinhoSellerApp_backend.git"
-                    target="_blank"
-                    class="btn btn-outline-dark btn-sm mr-2"
-                  >
-                    Backend
-                  </a>
-
-                  <a
-                    href="https://github.com/maxato237/drinhoSellerFrontend.git"
-                    target="_blank"
-                    class="btn btn-outline-dark btn-sm"
-                  >
-                    Frontend
-                  </a>
-                </div>
-                <div>Stack : Angular · Flask · MySQL</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body text-start">
-                <h4 class="card-title bold">OLIBO LEAGUE</h4>
-                <p class="card-text">
-                  Comprehensive championship management platform designed for
-                  amateur sports leagues in Cameroon. Enables seamless
-                  participant registration, real-time standings tracking, match
-                  results management, and a powerful admin dashboard for
-                  complete tournament control and operations.
-                </p>
-              </div>
-
-              <div class="card-footer text-muted small">
-                <div class="d-flex justify-content-between gap-2 mb-4">
-                  <a
-                    href="https://github.com/username/olibo-backend"
-                    target="_blank"
-                    class="btn btn-outline-dark btn-sm mr-2 disabled"
-                  >
-                    Backend
-                  </a>
-
-                  <a
-                    href="https://github.com/maxato237/olibofrontend.git"
-                    target="_blank"
-                    class="btn btn-outline-dark btn-sm"
-                  >
-                    Frontend
-                  </a>
-                </div>
-                <div>Stack : Angular · Flask · MySQL</div>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body text-start">
-                <h4 class="card-title bold">COLLABINNOVATE</h4>
-                <p class="card-text">
-                  Innovative matching platform connecting SME problems with tech
-                  solutions from startups and service providers. Facilitates
-                  problem discovery, solution browsing, and collaboration
-                  between enterprises and solution providers.
-                </p>
-              </div>
-
-              <div class="card-footer text-muted small">
-                <div class="d-flex justify-content-between gap-2 mb-4">
-                  <a
-                    href="https://github.com/username/olibo-backend"
-                    target="_blank"
-                    class="btn btn-outline-dark btn-sm mr-2 disabled"
-                  >
-                    Backend
-                  </a>
-
-                  <a
-                    href="https://github.com/maxato237/olibofrontend.git"
-                    target="_blank"
-                    class="btn btn-outline-dark btn-sm disabled"
-                  >
-                    Frontend
-                  </a>
-                </div>
-                <div>Stack : Angular · Flask · MySQL</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="row g-4" id="portfolio-repos"></div>
       </div>
     </section>
     <!-- End of portfolio section -->
@@ -622,6 +516,68 @@
         link.click();
         document.body.removeChild(link);
       }
+    </script>
+    <script>
+      const USERNAME = "maxato237";
+      const API_URL = `https://api.github.com/users/${USERNAME}/repos?per_page=100`;
+
+      const portfolioContainer = document.getElementById("portfolio-repos");
+
+      fetch(API_URL)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Erreur API GitHub");
+          }
+          return response.json();
+        })
+        .then((repos) => {
+          const filteredRepos = repos.filter(
+            (repo) =>
+              !repo.fork && // pas un fork
+              repo.size > 50 && // pas vide (en Ko)
+              repo.language !== null && // vrai code
+              !repo.archived // pas mort
+          );
+
+          filteredRepos.forEach((repo) => {
+            console.log(repo.name, repo.description);
+            const col = document.createElement("div");
+            col.className = "col-md-4 mb-4";
+
+            col.innerHTML = `
+                  <div class="card h-100 shadow-sm">
+                    <div class="card-body text-start">
+                      <h4 class="card-title bold">${repo.name}</h4>
+                      <p class="card-text">
+                        ${repo.description ?? "Aucune description fournie."}
+                      </p>
+                    </div>
+        
+                    <div class="card-footer text-muted small">
+                      <div class="d-flex justify-content-between gap-2 mb-3">
+                        <a
+                          href="${repo.html_url}"
+                          target="_blank"
+                          class="btn btn-outline-dark btn-sm w-100"
+                        >
+                          Voir sur GitHub
+                        </a>
+                      </div>
+                      <div>
+                        ⭐ ${repo.stargazers_count}
+                        · 🍴 ${repo.forks_count}
+                        · 🧠 ${repo.language ?? "N/A"}
+                      </div>
+                    </div>
+                  </div>
+                `;
+
+            portfolioContainer.appendChild(col);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     </script>
   </body>
 </html>
